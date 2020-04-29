@@ -47,7 +47,7 @@ registerBlockType(
 					dataSource
 				}
 			} = props;
-
+console.log( props );
 			return (
 				<Fragment>
 					<InspectorControls>
@@ -56,6 +56,7 @@ registerBlockType(
 								label={ __( 'Data Source', 'anything-block' ) }
 								value={ dataSource }
 								options={[
+									{ value: 'anything', label: __( 'Anything', 'anything-block' ) },
 									{ value: 'setting', label: __( 'Setting', 'anything-block' ) },
 									{ value: 'themeMod', label: __( 'Theme Mod', 'anything-block' ) },
 									{ value: 'postMeta', label: __( 'Post Meta', 'anything-block' ) },
@@ -63,13 +64,14 @@ registerBlockType(
 								onChange={ dataSource => setAttributes( { dataSource } ) }
 							/>
 
-							<TextControl
-								label={ __( 'Option Name', 'anything-block' ) }
-								help={ __( 'Type the name of the option, post-meta, theme-mod etc.', 'anything-block' ) }
-								value={ dataSourceName }
-								onChange={ dataSourceName => setAttributes( { dataSourceName } ) }
-							/>
-
+							{ 'anything' !== props.attributes.dataSource &&
+								<TextControl
+									label={ __( 'Option Name', 'anything-block' ) }
+									help={ __( 'Type the name of the option, post-meta, theme-mod etc.', 'anything-block' ) }
+									value={ dataSourceName }
+									onChange={ dataSourceName => setAttributes( { dataSourceName } ) }
+								/>
+							}
 							<TextareaControl
 								label={ __( 'Output HTML', 'anything-block' ) }
 								help={ __( 'HTML used to format the output. Use brackets {} to wrap the data. Example: {data}. If the value is an array, use a dot to get sub-item. Example: {data.item1}, {data.item2}', 'anything-block' ) }

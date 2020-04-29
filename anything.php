@@ -91,6 +91,32 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 				$value = get_post_meta( get_the_ID(), $atts['dataSourceName'] );
 			}
 			break;
+
+		case 'anything':
+			$value = [
+				'setting'  => json_decode( wp_json_encode( wp_load_alloptions() ), true ),
+				'themeMod' => json_decode( wp_json_encode( get_theme_mods() ), true ),
+				'post'     => json_decode( wp_json_encode( get_post( get_the_ID() ) ), true ),
+			];
+
+			$value['post']['meta'] = json_decode( wp_json_encode( get_post_meta( get_the_ID() ) ), true );
+			break;
+	}
+
+	if ( 'anything' === $atts['dataSource'] ) {
+		$string_parts = wplemon_anything_get_string_parts( $html );
+		foreach ( $string_parts as $string_part ) {
+			$search  = str_replace( 'anythingData', 'data', $string_part );
+			$replace = wplemon_anything_get_part_value( $string_part, $value );
+			if ( 'data' !== $search && is_string( $replace ) ) {
+				$html = str_replace(
+					'{' . $search . '}',
+					$replace,
+					$html
+				);
+			}
+		}
+		return $html;
 	}
 
 	if ( is_array( $value ) ) {
@@ -114,3 +140,68 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 }
 
 add_action( 'init', 'wplemon_anything_block_init' );
+
+/**
+ * Get search strings from our HTML.
+ *
+ * @since 1.1.0
+ * @param string $html The HTML.
+ * @return array
+ */
+function wplemon_anything_get_string_parts( $html ) {
+	$the_parts = [];
+
+	$parts = explode( '{data', $html );
+	foreach ( $parts as $part ) {
+		$the_parts[] = 'anythingData' . explode( '}', $part )[0];
+	}
+	return $the_parts;
+}
+
+/**
+ * Get the value of a part.
+ *
+ * @since 1.1.0
+ * @param string $part The part we're looking for.
+ * @param array  $values Where we're looking for the part.
+ * @return string
+ */
+function wplemon_anything_get_part_value( $part, $values ) {
+	if ( is_string( $values ) || is_bool( $values ) || is_numeric( $values ) ) {
+		return (string) $values;
+	}
+	$values = (array) $values;
+
+	$part = str_replace( 'anythingData.', '', $part );
+	if ( isset( $values[ $part ] ) && ! is_array( $values[ $part ] ) && ! is_object( $values[ $part ] ) ) {
+		return $values[ $part ];
+	}
+
+	if ( false !== strpos( $part, '.' ) ) {
+		$fragment = explode( '.', $part )[0];
+
+		if ( isset( $values[ $fragment ] ) ) {
+			return wplemon_anything_get_part_value( str_replace( "$fragment.", '', $part ), $values[ $fragment ] );
+		}
+	}
+
+	if ( ! is_array( $values ) ) {
+		return $values;
+	}
+
+	if ( current_user_can( 'update_core' ) ) {
+		$debug = '<table style="font-size:0.6em;background:#fef8ee;color:#333;border:1px solid #f0b849;white-space:pre-wrap">';
+		foreach ( $values as $key => $val ) {
+			$debug .= '<tr>';
+			$debug .= "<td><code>$key</code></td>";
+			$debug .= is_array( $val ) || is_object( $val )
+				? '<td><code>' . wp_json_encode( $val ) . '</code></td>'
+				: "<td><code>$val</code></td>";
+			$debug .= '</tr>';
+		}
+		$debug .= '</table>';
+
+		return $debug;
+	}
+	return '';
+}
