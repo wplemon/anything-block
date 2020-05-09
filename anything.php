@@ -4,7 +4,7 @@
  * Plugin URI:  https://wplemon.com
  * Author:      Ari Stathopoulos
  * Author URI:  http://aristath.github.io
- * Version:     1.0.1
+ * Version:     1.0.2
  * Description: Print any kind of data, any way you want it.
  * Text Domain: anything-block
  *
@@ -37,7 +37,7 @@ function wplemon_anything_block_init() {
 			'attributes'      => [
 				'htmlData'       => [
 					'type'    => 'text',
-					'default' => '{data}',
+					'default' => '',
 				],
 				'dataSourceName' => [ // Backwards-compatibility.
 					'type'    => 'text',
@@ -70,7 +70,7 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 	$value = '';
 	$html  = $atts['htmlData'];
 
-	if ( isset( $atts['dataSource'] ) ) { // Backwards-compatibility.
+	if ( isset( $atts['dataSource'] ) && 'anything' !== $atts['dataSource'] ) { // Backwards-compatibility.
 		if ( isset( $atts['dataSourceName'] ) && '' !== $atts['dataSourceName'] ) {
 			$html = str_replace( '{data}', "{data.{$atts['dataSource']}.{$atts['dataSourceName']}}", $html );
 		} else {
