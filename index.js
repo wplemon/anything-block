@@ -12,7 +12,6 @@ const {
 	PanelBody,
 	TextControl,
 	TextareaControl,
-	SelectControl
 } = wp.components;
 
 registerBlockType(
@@ -28,15 +27,11 @@ registerBlockType(
 			__( 'Theme Mod', 'anything-block' ),
         ],
         attributes: {
-			dataSourceName: {
-				type: 'string',
-			},
 			htmlData: {
 				type: 'text',
 			},
-			dataSource: {
-				type: 'string',
-			},
+			dataSourceName: { type: 'string' }, // Backwards-compatibility.
+			dataSource: { type: 'string' }, // Backwards-compatibility.
 		},
         edit: props => {
             const { setAttributes } = props;
@@ -47,31 +42,20 @@ registerBlockType(
 					dataSource
 				}
 			} = props;
-console.log( props );
+
+			// Backwards-compatibility.
+			if ( dataSource && '' !== dataSource ) {
+				if ( dataSourceName && '' !== dataSourceName ) {
+					props.attributes.htmlData = props.attributes.htmlData.replace( '{data}', '{data.' + dataSource + '.' + props.attributes.dataSourceName + '}' )
+				} else {
+					props.attributes.htmlData = props.attributes.htmlData.replace( '{data.', '{data.' + dataSource + '.' );
+				}
+			}
+
 			return (
 				<Fragment>
 					<InspectorControls>
 						<PanelBody>
-							<SelectControl
-								label={ __( 'Data Source', 'anything-block' ) }
-								value={ dataSource }
-								options={[
-									{ value: 'anything', label: __( 'Anything', 'anything-block' ) },
-									{ value: 'setting', label: __( 'Setting', 'anything-block' ) },
-									{ value: 'themeMod', label: __( 'Theme Mod', 'anything-block' ) },
-									{ value: 'postMeta', label: __( 'Post Meta', 'anything-block' ) },
-								]}
-								onChange={ dataSource => setAttributes( { dataSource } ) }
-							/>
-
-							{ 'anything' !== props.attributes.dataSource &&
-								<TextControl
-									label={ __( 'Option Name', 'anything-block' ) }
-									help={ __( 'Type the name of the option, post-meta, theme-mod etc.', 'anything-block' ) }
-									value={ dataSourceName }
-									onChange={ dataSourceName => setAttributes( { dataSourceName } ) }
-								/>
-							}
 							<TextareaControl
 								label={ __( 'Output HTML', 'anything-block' ) }
 								help={ __( 'HTML used to format the output. Use brackets {} to wrap the data. Example: {data}. If the value is an array, use a dot to get sub-item. Example: {data.item1}, {data.item2}', 'anything-block' ) }

@@ -35,15 +35,15 @@ function wplemon_anything_block_init() {
 		'wplemon/anything',
 		[
 			'attributes'      => [
-				'dataSourceName' => [
-					'type'    => 'text',
-					'default' => '',
-				],
 				'htmlData'       => [
 					'type'    => 'text',
 					'default' => '{data}',
 				],
-				'dataSource'     => [
+				'dataSourceName' => [ // Backwards-compatibility.
+					'type'    => 'text',
+					'default' => '',
+				],
+				'dataSource'     => [ // Backwards-compatibility.
 					'type'    => 'text',
 					'default' => 'anything',
 				],
@@ -69,72 +69,34 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 
 	$value = '';
 	$html  = $atts['htmlData'];
-	switch ( $atts['dataSource'] ) {
-		case 'setting':
-		case 'option':
-			$value = wp_load_alloptions();
-			if ( isset( $atts['dataSourceName'] ) && ! empty( $atts['dataSourceName'] ) ) {
-				$value = get_option( $atts['dataSourceName'] );
-			}
-			break;
 
-		case 'themeMod':
-			$value = get_theme_mods();
-			if ( isset( $atts['dataSourceName'] ) && ! empty( $atts['dataSourceName'] ) ) {
-				$value = get_option( $atts['dataSourceName'] );
-			}
-			break;
-
-		case 'postMeta':
-			$value = get_post_meta( get_the_ID() );
-			if ( isset( $atts['dataSourceName'] ) && ! empty( $atts['dataSourceName'] ) ) {
-				$value = get_post_meta( get_the_ID(), $atts['dataSourceName'] );
-			}
-			break;
-
-		default:
-			$value = [
-				'setting'  => json_decode( wp_json_encode( wp_load_alloptions() ), true ),
-				'themeMod' => json_decode( wp_json_encode( get_theme_mods() ), true ),
-				'post'     => json_decode( wp_json_encode( get_post( get_the_ID() ) ), true ),
-			];
-
-			$value['post']['meta'] = json_decode( wp_json_encode( get_post_meta( get_the_ID() ) ), true );
-			break;
+	if ( isset( $atts['dataSource'] ) ) { // Backwards-compatibility.
+		if ( isset( $atts['dataSourceName'] ) && '' !== $atts['dataSourceName'] ) {
+			$html = str_replace( '{data}', "{data.{$atts['dataSource']}.{$atts['dataSourceName']}}", $html );
+		} else {
+			$html = str_replace( '{data.', "{data.{$atts['dataSource']}.", $html );
+		}
 	}
 
-	if ( ! $atts['dataSource'] || 'anything' === $atts['dataSource'] ) {
-		$string_parts = wplemon_anything_get_string_parts( $html );
-		foreach ( $string_parts as $string_part ) {
-			$search  = str_replace( 'anythingData', 'data', $string_part );
-			$replace = wplemon_anything_get_part_value( $string_part, $value );
-			if ( 'data' !== $search && is_string( $replace ) ) {
-				$html = str_replace(
-					'{' . $search . '}',
-					$replace,
-					$html
-				);
-			}
-		}
-		return $html;
-	}
+	$value = [
+		'setting'  => json_decode( wp_json_encode( wp_load_alloptions() ), true ),
+		'themeMod' => json_decode( wp_json_encode( get_theme_mods() ), true ),
+		'post'     => json_decode( wp_json_encode( get_post( get_the_ID() ) ), true ),
+	];
 
-	if ( is_array( $value ) ) {
-		foreach ( $value as $key => $val ) {
-			$val = maybe_unserialize( $val );
-			if ( is_string( $val ) || is_numeric( $val ) ) {
-				$html = str_replace( "{data.{$key}}", $val, $html );
-			} else {
-				foreach ( $val as $sub_key => $sub_val ) {
-					$sub_val = maybe_unserialize( $sub_val );
-					if ( is_string( $sub_val ) || is_numeric( $sub_val ) ) {
-						$html = str_replace( "{data.{$key}.{$sub_key}", $sub_val, $html );
-					}
-				}
-			}
+	$value['post']['meta'] = json_decode( wp_json_encode( get_post_meta( get_the_ID() ) ), true );
+
+	$string_parts = wplemon_anything_get_string_parts( $html );
+	foreach ( $string_parts as $string_part ) {
+		$search  = str_replace( 'anythingData', 'data', $string_part );
+		$replace = wplemon_anything_get_part_value( $string_part, $value );
+		if ( 'data' !== $search && is_string( $replace ) ) {
+			$html = str_replace(
+				'{' . $search . '}',
+				$replace,
+				$html
+			);
 		}
-	} else {
-		$html = str_replace( '{data}', $value, $html );
 	}
 	return $html;
 }
