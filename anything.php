@@ -45,7 +45,7 @@ function wplemon_anything_block_init() {
 				],
 				'dataSource'     => [
 					'type'    => 'text',
-					'default' => 'setting',
+					'default' => 'anything',
 				],
 			],
 			'editor_script'   => 'anything-block',
@@ -92,7 +92,7 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 			}
 			break;
 
-		case 'anything':
+		default:
 			$value = [
 				'setting'  => json_decode( wp_json_encode( wp_load_alloptions() ), true ),
 				'themeMod' => json_decode( wp_json_encode( get_theme_mods() ), true ),
@@ -103,7 +103,7 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 			break;
 	}
 
-	if ( 'anything' === $atts['dataSource'] ) {
+	if ( ! $atts['dataSource'] || 'anything' === $atts['dataSource'] ) {
 		$string_parts = wplemon_anything_get_string_parts( $html );
 		foreach ( $string_parts as $string_part ) {
 			$search  = str_replace( 'anythingData', 'data', $string_part );
@@ -190,13 +190,18 @@ function wplemon_anything_get_part_value( $part, $values ) {
 	}
 
 	if ( current_user_can( 'update_core' ) ) {
-		$debug = '<table style="font-size:0.6em;background:#fef8ee;color:#333;border:1px solid #f0b849;white-space:pre-wrap">';
+		$debug  = '<table style="font-size:0.6em;background:#fef8ee;color:#333;border:1px solid #f0b849;white-space:pre-wrap" border="1">';
+		$debug .= '<thead><tr><td>' . esc_html__( 'Name', 'anything-block' ) . '</td><td>' . esc_html__( 'Type', 'anything-block' ) . '</td><td>' . esc_html__( 'Value', 'anything-block' ) . '</td></tr</thead>';
 		foreach ( $values as $key => $val ) {
 			$debug .= '<tr>';
-			$debug .= "<td><code>$key</code></td>";
-			$debug .= is_array( $val ) || is_object( $val )
-				? '<td><code>' . wp_json_encode( $val ) . '</code></td>'
-				: "<td><code>$val</code></td>";
+			$debug .= "<td style='vertical-align:top'><code>$key</code></td>";
+			$debug .= '<td style="vertical-align:top"><code>' . gettype( $val ) . '</td>';
+			if ( is_array( $val ) || is_object( $val ) ) {
+				$val    = (array) $val;
+				$debug .= '<td style="vertical-align:top"><ul><li><code>' . implode( '</code></li><li><code>', array_keys( $val ) ) . '</code></li></ul></td>';
+			} else {
+				$debug .= "<td style='vertical-align:top'><code>$val</code></td>";
+			}
 			$debug .= '</tr>';
 		}
 		$debug .= '</table>';
