@@ -4,7 +4,7 @@
  * Plugin URI:  https://wplemon.com
  * Author:      Ari Stathopoulos
  * Author URI:  http://aristath.github.io
- * Version:     1.0.0
+ * Version:     1.0.1
  * Description: Print any kind of data, any way you want it.
  * Text Domain: anything-block
  *
