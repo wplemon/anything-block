@@ -2,8 +2,8 @@
 Contributors: aristath
 Tags: blocks, gutenberg blocks, gutenberg, editor
 Requires at least: 5.0
-Tested up to: 5.4
-Stable tag: 1.0.2
+Tested up to: 6.4
+Stable tag: 1.0.3
 Requires PHP: 5.6
 License: MIT
 License URI: https://opensource.org/licenses/MIT
