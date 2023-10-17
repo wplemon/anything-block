@@ -4,7 +4,7 @@
  * Plugin URI:  https://wplemon.com
  * Author:      Ari Stathopoulos
  * Author URI:  http://aristath.github.io
- * Version:     1.0.2
+ * Version:     1.0.3
  * Description: Print any kind of data, any way you want it.
  * Text Domain: anything-block
  *
@@ -26,31 +26,31 @@ function wplemon_anything_block_init() {
 	wp_register_script(
 		'anything-block',
 		plugins_url( 'block.js', __FILE__ ),
-		[ 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-server-side-render', 'wp-data' ],
+		array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-server-side-render', 'wp-data' ),
 		filemtime( __DIR__ . '/block.js' ),
 		false
 	);
 
 	register_block_type(
 		'wplemon/anything',
-		[
-			'attributes'      => [
-				'htmlData'       => [
+		array(
+			'attributes'      => array(
+				'htmlData'       => array(
 					'type'    => 'text',
 					'default' => '',
-				],
-				'dataSourceName' => [ // Backwards-compatibility.
+				),
+				'dataSourceName' => array( // Backwards-compatibility.
 					'type'    => 'text',
 					'default' => '',
-				],
-				'dataSource'     => [ // Backwards-compatibility.
+				),
+				'dataSource'     => array( // Backwards-compatibility.
 					'type'    => 'text',
 					'default' => 'anything',
-				],
-			],
+				),
+			),
 			'editor_script'   => 'anything-block',
 			'render_callback' => 'wplemon_anything_block_render_callback',
-		]
+		)
 	);
 }
 
@@ -78,11 +78,11 @@ function wplemon_anything_block_render_callback( $atts, $content ) {
 		}
 	}
 
-	$value = [
+	$value = array(
 		'setting'  => json_decode( wp_json_encode( wp_load_alloptions() ), true ),
 		'themeMod' => json_decode( wp_json_encode( get_theme_mods() ), true ),
 		'post'     => json_decode( wp_json_encode( get_post( get_the_ID() ) ), true ),
-	];
+	);
 
 	$value['post']['meta'] = json_decode( wp_json_encode( get_post_meta( get_the_ID() ) ), true );
 
@@ -111,7 +111,7 @@ add_action( 'init', 'wplemon_anything_block_init' );
  * @return array
  */
 function wplemon_anything_get_string_parts( $html ) {
-	$the_parts = [];
+	$the_parts = array();
 
 	$parts = explode( '{data', $html );
 	foreach ( $parts as $part ) {

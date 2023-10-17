@@ -5,7 +5,7 @@ const { InspectorControls } = wp.editor;
 const ServerSideRender = wp.serverSideRender;
 const { Fragment } = wp.element;
 const {
-    registerBlockType,
+	registerBlockType,
 } = wp.blocks;
 
 const {
@@ -15,26 +15,26 @@ const {
 } = wp.components;
 
 registerBlockType(
-    'wplemon/anything',
-    {
-        title: __( 'Anything', 'anything-block' ),
-        description: __( 'Print any kind of data, any way you want it.', 'anything-block' ),
-        category: 'widgets',
-        keywords: [
-            __( 'Options', 'anything-block' ),
-            __( 'Settings', 'anything-block' ),
+	'wplemon/anything',
+	{
+		title: __( 'Anything', 'anything-block' ),
+		description: __( 'Print any kind of data, any way you want it.', 'anything-block' ),
+		category: 'widgets',
+		keywords: [
+			__( 'Options', 'anything-block' ),
+			__( 'Settings', 'anything-block' ),
 			__( 'Post Meta', 'anything-block' ),
 			__( 'Theme Mod', 'anything-block' ),
-        ],
-        attributes: {
+		],
+		attributes: {
 			htmlData: {
 				type: 'text',
 			},
 			dataSourceName: { type: 'string' }, // Backwards-compatibility.
 			dataSource: { type: 'string' }, // Backwards-compatibility.
 		},
-        edit: props => {
-            const { setAttributes } = props;
+		edit: props => {
+			const { setAttributes } = props;
 			const {
 				attributes: {
 					dataSourceName,
@@ -79,5 +79,5 @@ registerBlockType(
 		save() {
 			return null; // Rendering in PHP.
 		}
-    },
+	},
 );
